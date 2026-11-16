@@ -1,0 +1,13 @@
+{
+  "name": "stevens-parking-prototype",
+  "version": "1.0.0",
+  "description": "MGT 103 prototype: phone camera counts cars at the Babbio garage entrance and updates live open-space counts",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node test/detector.test.js && node test/server.test.js"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}

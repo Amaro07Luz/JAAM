@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Camera counter · Stevens Parking</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="icon" href="icon.svg" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="screen" style="padding-bottom: 40px">
+    <div class="row">
+      <div class="row" style="justify-content:flex-start; gap:12px">
+        <div style="width:44px;height:44px;border-radius:12px;background:var(--red);color:#fff;display:grid;place-items:center;font-weight:700;font-size:22px">P</div>
+        <div><div style="font-weight:600;font-size:18px">Camera counter</div><div class="small muted">Stevens Parking prototype</div></div>
+      </div>
+      <span class="pill"><span class="dot off" id="connDot"></span><span id="connText">Connecting…</span></span>
+    </div>
+
+    <div class="card">
+      <label class="field">This camera's name
+        <input type="text" id="camName" placeholder="e.g. Entrance phone" />
+      </label>
+      <label class="field">Where is this camera?
+        <select id="camLocation"></select>
+      </label>
+      <div class="row" style="margin-top:14px; gap:10px">
+        <button class="btn small" id="startCam">Start camera</button>
+        <label class="btn small secondary" style="margin:0">Use a video file
+          <input type="file" id="videoFile" accept="video/*" hidden />
+        </label>
+        <button class="btn small secondary" id="resetBg" title="Re-learn the empty lane">Relearn</button>
+      </div>
+      <p class="small muted" style="margin:12px 0 0">Point the camera at the lane so cars drive <b>across</b> the two boxes. Keep the lane empty for 2 seconds after starting, so it can learn what "empty" looks like.</p>
+    </div>
+
+    <div class="cam-wrap" id="camWrap" hidden>
+      <video id="video" playsinline muted></video>
+      <canvas class="overlay" id="overlay"></canvas>
+    </div>
+
+    <div class="counts">
+      <div class="card"><div class="small muted">Cars IN</div><div class="big" id="inCount">0</div></div>
+      <div class="card"><div class="small muted">Cars OUT</div><div class="big" id="outCount">0</div></div>
+    </div>
+
+    <div class="card">
+      <div class="row"><b>Zone activity</b><span class="small muted">red line = trigger level</span></div>
+      <div class="zone-row" style="grid-template-columns:28px 1fr 48px"><b>A</b><div class="meter"><i id="meterA"></i><u id="trigA"></u></div><span class="small" id="fracA">0%</span></div>
+      <div class="zone-row" style="grid-template-columns:28px 1fr 48px"><b>B</b><div class="meter"><i id="meterB"></i><u id="trigB"></u></div><span class="small" id="fracB">0%</span></div>
+      <div class="small muted" style="margin-top:10px">State: <span id="phase">idle</span> · AI check: <span id="aiStatus">off</span></div>
+      <div class="row" style="margin-top:14px; gap:10px">
+        <button class="btn small secondary" id="manualIn">+1 IN (manual)</button>
+        <button class="btn small secondary" id="manualOut">+1 OUT (manual)</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <details>
+        <summary>Settings</summary>
+        <label class="field">Cars move…
+          <select id="orientation">
+            <option value="horizontal">Left ↔ right across the screen</option>
+            <option value="vertical">Up ↔ down the screen</option>
+          </select>
+        </label>
+        <label class="field">Which way is "IN" (entering / going up)?
+          <select id="inDir">
+            <option value="AtoB">A → B</option>
+            <option value="BtoA">B → A</option>
+          </select>
+        </label>
+        <label class="field">Zone A position <span id="posAVal"></span><input type="range" id="posA" min="0.05" max="0.95" step="0.01" /></label>
+        <label class="field">Zone B position <span id="posBVal"></span><input type="range" id="posB" min="0.05" max="0.95" step="0.01" /></label>
+        <label class="field">Zone thickness <span id="bandVal"></span><input type="range" id="band" min="0.03" max="0.3" step="0.01" /></label>
+        <label class="field">Zone covers from <span id="spanStartVal"></span><input type="range" id="spanStart" min="0" max="1" step="0.01" /></label>
+        <label class="field">…to <span id="spanEndVal"></span><input type="range" id="spanEnd" min="0" max="1" step="0.01" /></label>
+        <label class="field">Sensitivity: share of zone that must change <span id="activeFractionVal"></span><input type="range" id="activeFraction" min="0.05" max="0.6" step="0.01" /></label>
+        <label class="field">Pixel change threshold <span id="pixelThresholdVal"></span><input type="range" id="pixelThreshold" min="10" max="80" step="1" /></label>
+        <label class="check" style="margin:16px 0 0">Only count if the AI sees a vehicle (filters out people)
+          <input type="checkbox" id="aiCheck" />
+        </label>
+        <label class="check" style="margin:12px 0 0">Show "what changed" mask (debug)
+          <input type="checkbox" id="showMask" />
+        </label>
+      </details>
+    </div>
+
+    <div class="card">
+      <b>Log</b>
+      <div class="log" id="log"></div>
+    </div>
+
+    <p class="foot"><a href="/#/garage">Open the parking app</a> · <a href="/#/admin">Admin</a></p>
+  </div>
+
+  <canvas id="work" hidden></canvas>
+  <script src="detector.js"></script>
+  <script src="camera.js"></script>
+</body>
+</html>
